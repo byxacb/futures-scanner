@@ -1,11 +1,14 @@
 name: 期货机会扫描
 
 on:
+  # 多种触发方式确保稳定运行
   schedule:
-    - cron: '*/5 * * * 1-5'  # 每5分钟，周一到周五
+    - cron: '0,5,10,15,20,25,30,35,40,45,50,55 * * * *'  # 每5分钟
+  push:
+    branches: [main]  # 每次推送也触发
   workflow_dispatch:
   repository_dispatch:
-    types: [scan]  # 外部触发
+    types: [scan]
 
 jobs:
   scan:
