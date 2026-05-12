@@ -1,0 +1,38 @@
+name: FuturesBot
+options:
+  bundleIdPrefix: com.futuresbot
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    INFOPLIST_KEY_CFBundleDisplayName: "FuturesBot"
+    INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+    INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+    INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+    CODE_SIGN_STYLE: Automatic
+    PRODUCT_BUNDLE_IDENTIFIER: com.futuresbot.app
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  FuturesBot:
+    type: application
+    platform: iOS
+    sources:
+      - path: FuturesBot
+    info:
+      path: FuturesBot/Info.plist
+      properties:
+        App Transport Security Settings:
+          Allow Arbitrary Loads: YES
+        NSMicrophoneUsageDescription: "用于语音输入"
+        NSPhotoLibraryUsageDescription: "用于保存截图"
+    settings:
+      base:
+        INFOPLIST_KEY_CFBundleDisplayName: "FuturesBot"

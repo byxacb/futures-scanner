@@ -1,11 +1,7 @@
 name: 期货机会扫描
 
-# 每5分钟扫描一次（交易时间）
-# 北京时间 UTC+8，GitHub Actions 用 UTC
-
 on:
   schedule:
-    # 每5分钟运行（周一到周五）
     - cron: '*/5 * * * 1-5'
   workflow_dispatch:
 
@@ -26,4 +22,9 @@ jobs:
       - name: 扫描期货机会
         env:
           BARK_URL: ${{ secrets.BARK_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_TO: ${{ secrets.SMTP_TO }}
         run: python tools/research/cloud_scanner.py

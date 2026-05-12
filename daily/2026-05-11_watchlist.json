@@ -1,0 +1,26 @@
+[
+  {
+    "symbol": "rb",
+    "type": "stop_long",
+    "trigger": 3215,
+    "note": "RB2610 多 12 手 @3270 的止损位，触发后立即去掘金雷达手动平仓"
+  },
+  {
+    "symbol": "rb",
+    "type": "take_profit_long",
+    "trigger": 3299,
+    "note": "RB2610 多 12 手的第一档加仓位（浮盈 +1×ATR）"
+  },
+  {
+    "symbol": "rb",
+    "type": "take_profit_long",
+    "trigger": 3328,
+    "note": "RB2610 第二档加仓位（浮盈 +2×ATR）"
+  },
+  {
+    "symbol": "rb",
+    "type": "take_profit_long",
+    "trigger": 3357,
+    "note": "RB2610 第三档加仓位（浮盈 +3×ATR，满仓 24 手）"
+  }
+]

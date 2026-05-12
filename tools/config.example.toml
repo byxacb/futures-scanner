@@ -1,0 +1,74 @@
+# 配置模板。复制为 config.toml 后填入实际值。
+# 注意：API Key 不要写在这里！写到同目录的 .env 文件，并加入 .gitignore
+
+[account]
+# 比赛账户起始净值（虚拟）
+starting_equity = 1_000_000.0
+# 当前账户净值——每日 evening.py 会自动更新
+current_equity = 1_000_000.0
+# 单笔风险率（默认 1%）
+risk_per_trade = 0.01
+
+[risk_rules]
+# 这些都从 strategy/master_playbook.md 同步过来
+single_symbol_margin_pct_max = 0.10
+total_margin_pct_max = 0.70
+single_direction_margin_pct_max = 0.40
+daily_loss_pct_max = 0.03
+weekly_loss_pct_max = 0.06
+atr_stop_multiplier = 2.0
+high_confidence_multiplier = 1.5
+
+[universe]
+# 默认品种池（5 个，可在周复盘后调整）
+symbols = ["rb", "m", "au", "IF", "sc"]
+# 候补
+backup = ["i", "p", "cu", "FG", "PTA", "IH", "IC", "TS", "T"]
+
+[exchange]
+# 比赛规则的调整
+fee_multiplier = 2.0   # 手续费 ×2
+margin_addon = 0.03    # 保证金 +3%
+
+[llm]
+# 当前选择：anthropic 兼容协议（用户的小米 MiMo via token-plan 代理）
+# 可选: anthropic / deepseek / zhipu / doubao
+provider = "anthropic"
+model = "mimo-v2.5-pro"
+# API Key 与 base_url 都在 .env 里：
+#   ANTHROPIC_API_KEY=tp-...
+#   ANTHROPIC_BASE_URL=https://token-plan-cn.xiaomimimo.com/anthropic
+#   ANTHROPIC_MODEL=mimo-v2.5-pro
+timeout_seconds = 60
+max_retries = 3
+
+[news_sources]
+# 公开新闻源（爬下来给 LLM 打情绪）
+sources = [
+    "https://www.cls.cn/depth?id=1003",          # 财联社
+    "https://www.wallstreetcn.com/news",          # 华尔街见闻
+    "https://finance.eastmoney.com/news",         # 东方财富
+    "https://www.sci99.com/news.html",            # 卓创资讯（黑色）
+]
+# 每个品种关注的关键词
+keywords = {
+    rb = ["螺纹", "钢材", "地产", "基建", "钢厂"],
+    m = ["豆粕", "大豆", "USDA", "美豆"],
+    au = ["黄金", "美联储", "通胀", "实际利率"],
+    IF = ["A股", "沪深300", "央行", "降准"],
+    sc = ["原油", "OPEC", "EIA"],
+}
+
+[paths]
+# 项目目录的相对路径——脚本默认在 tools/ 下运行
+project_root = ".."
+daily_dir = "../daily"
+data_cache_dir = "./data/cache"
+
+[briefing]
+# 简报参数
+morning_hour = 8
+evening_hour = 15
+night_hour = 21
+# 单品种简报最长字数（不让 LLM 啰嗦）
+max_words_per_symbol = 200

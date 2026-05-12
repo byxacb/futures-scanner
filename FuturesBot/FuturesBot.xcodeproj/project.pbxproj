@@ -1,0 +1,461 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07E99286D4F439B6A3CCB168 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F364035FA75543ECADEA74B /* ChatView.swift */; };
+		1BC0ADE8B946A0938357952C /* FuturesBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C70F64C4E09BC235CCF6E5 /* FuturesBotApp.swift */; };
+		306B5C82F275FD3A6610E8A0 /* SinaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C51870ED41BB9B6CEA2520 /* SinaAPI.swift */; };
+		415DD10E20E81FF1B5BBE224 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DA2D5DF7B07C47C424C44D /* DashboardView.swift */; };
+		64580A1555E08BA1C74C4B32 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81472ECE578DF762550413A0 /* SettingsView.swift */; };
+		793984C70E29FBD15D82AF0E /* KnowledgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 492723987BB020506AF30E53 /* KnowledgeView.swift */; };
+		900FDFC92971C043D5C637AF /* PositionCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66AF0BEBB42E6ABED43DFEF3 /* PositionCalculator.swift */; };
+		9260B3EB144AB356785404DB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046812D5F72029CCD5AB0EA1 /* ContentView.swift */; };
+		A3A3922E4652FB31659EAC7F /* MarketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577C2B4F04F8F35705D865F2 /* MarketService.swift */; };
+		C4CBADC575E1E51ABBD8E09B /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B41C23E648CA61919F8BB2 /* NotificationService.swift */; };
+		C66AB56D222593B392621662 /* MonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA6272C9E9568000099BAA1 /* MonitorView.swift */; };
+		DAA0DF236057FB87F68DCFFF /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90A2ACC585873F24929FDB4 /* Quote.swift */; };
+		EA38D03B1E87EF9257DB73C8 /* IndicatorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68CF959A5C8C4CA372EC325 /* IndicatorEngine.swift */; };
+		EAC37B53EE1F77154A6A1AB7 /* SignalEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72DE3A922F8F2A4C91755BCB /* SignalEngine.swift */; };
+		F0CC7C5C12D2BD81C87538D9 /* LLMClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F27945B90F4B63CA36469B67 /* LLMClient.swift */; };
+		FDFE94E525F30531505F409B /* TradeDecisionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF94DFCC8A446F127917B42 /* TradeDecisionView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		046812D5F72029CCD5AB0EA1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		0F364035FA75543ECADEA74B /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		21C51870ED41BB9B6CEA2520 /* SinaAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinaAPI.swift; sourceTree = "<group>"; };
+		492723987BB020506AF30E53 /* KnowledgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeView.swift; sourceTree = "<group>"; };
+		56B41C23E648CA61919F8BB2 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		577C2B4F04F8F35705D865F2 /* MarketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketService.swift; sourceTree = "<group>"; };
+		5BBDAF784C82D8CBD587DC73 /* FuturesBot.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FuturesBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		66AF0BEBB42E6ABED43DFEF3 /* PositionCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionCalculator.swift; sourceTree = "<group>"; };
+		6FA6272C9E9568000099BAA1 /* MonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorView.swift; sourceTree = "<group>"; };
+		72DE3A922F8F2A4C91755BCB /* SignalEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalEngine.swift; sourceTree = "<group>"; };
+		81472ECE578DF762550413A0 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		85C70F64C4E09BC235CCF6E5 /* FuturesBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuturesBotApp.swift; sourceTree = "<group>"; };
+		B68CF959A5C8C4CA372EC325 /* IndicatorEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorEngine.swift; sourceTree = "<group>"; };
+		CDF94DFCC8A446F127917B42 /* TradeDecisionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeDecisionView.swift; sourceTree = "<group>"; };
+		D5DA2D5DF7B07C47C424C44D /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		E90A2ACC585873F24929FDB4 /* Quote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
+		F27945B90F4B63CA36469B67 /* LLMClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
+		F355E3778EED860CC87F1FE0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		01D3C6D941ADF468FA663CA9 /* Trading */ = {
+			isa = PBXGroup;
+			children = (
+				CDF94DFCC8A446F127917B42 /* TradeDecisionView.swift */,
+			);
+			path = Trading;
+			sourceTree = "<group>";
+		};
+		185D741DC082DC5FEF5347E0 /* Monitor */ = {
+			isa = PBXGroup;
+			children = (
+				6FA6272C9E9568000099BAA1 /* MonitorView.swift */,
+			);
+			path = Monitor;
+			sourceTree = "<group>";
+		};
+		4484C6D1882AF196CD913091 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				0F364035FA75543ECADEA74B /* ChatView.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		882A8D6CA3F6B456DDA05042 /* Knowledge */ = {
+			isa = PBXGroup;
+			children = (
+				492723987BB020506AF30E53 /* KnowledgeView.swift */,
+			);
+			path = Knowledge;
+			sourceTree = "<group>";
+		};
+		8B369309A66BE3D041B730D5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5BBDAF784C82D8CBD587DC73 /* FuturesBot.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8C523A1B6F68BDDBAF695DFA /* FuturesBot */ = {
+			isa = PBXGroup;
+			children = (
+				F355E3778EED860CC87F1FE0 /* Info.plist */,
+				AFB80D5833AB93A559E6BBE6 /* App */,
+				F89B56C847F6AD29ED0E5429 /* Data */,
+				A9F5C1E3E0546BA85898529B /* Models */,
+				B2BD0CE3A1BB9D7722949B0A /* Resources */,
+				E40778DBDDFA7C347E81D09D /* Services */,
+				AECDCF775CC5FECE7709B2E6 /* Views */,
+			);
+			path = FuturesBot;
+			sourceTree = "<group>";
+		};
+		9928E423AD33C8AF7928B96F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				81472ECE578DF762550413A0 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		A9F5C1E3E0546BA85898529B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E90A2ACC585873F24929FDB4 /* Quote.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AECDCF775CC5FECE7709B2E6 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4484C6D1882AF196CD913091 /* Chat */,
+				D875EF3AFBD9FE6FEDB7281E /* Dashboard */,
+				882A8D6CA3F6B456DDA05042 /* Knowledge */,
+				185D741DC082DC5FEF5347E0 /* Monitor */,
+				9928E423AD33C8AF7928B96F /* Settings */,
+				01D3C6D941ADF468FA663CA9 /* Trading */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AFB80D5833AB93A559E6BBE6 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				046812D5F72029CCD5AB0EA1 /* ContentView.swift */,
+				85C70F64C4E09BC235CCF6E5 /* FuturesBotApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		B2BD0CE3A1BB9D7722949B0A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D875EF3AFBD9FE6FEDB7281E /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				D5DA2D5DF7B07C47C424C44D /* DashboardView.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		E40778DBDDFA7C347E81D09D /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B68CF959A5C8C4CA372EC325 /* IndicatorEngine.swift */,
+				F27945B90F4B63CA36469B67 /* LLMClient.swift */,
+				577C2B4F04F8F35705D865F2 /* MarketService.swift */,
+				56B41C23E648CA61919F8BB2 /* NotificationService.swift */,
+				66AF0BEBB42E6ABED43DFEF3 /* PositionCalculator.swift */,
+				72DE3A922F8F2A4C91755BCB /* SignalEngine.swift */,
+				21C51870ED41BB9B6CEA2520 /* SinaAPI.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		ED37EEDBF6180BA56D637809 = {
+			isa = PBXGroup;
+			children = (
+				8C523A1B6F68BDDBAF695DFA /* FuturesBot */,
+				8B369309A66BE3D041B730D5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F89B56C847F6AD29ED0E5429 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7070831575AF2B307CAA7230 /* FuturesBot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A267C1A4A77A4ED908FEC2B1 /* Build configuration list for PBXNativeTarget "FuturesBot" */;
+			buildPhases = (
+				913920F455ADDE4986618CDA /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FuturesBot;
+			packageProductDependencies = (
+			);
+			productName = FuturesBot;
+			productReference = 5BBDAF784C82D8CBD587DC73 /* FuturesBot.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C2DA5BAB1571E4AE1B202F15 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					7070831575AF2B307CAA7230 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = DF239EA48C4FD8F6EC0F2DCA /* Build configuration list for PBXProject "FuturesBot" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = ED37EEDBF6180BA56D637809;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8B369309A66BE3D041B730D5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7070831575AF2B307CAA7230 /* FuturesBot */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		913920F455ADDE4986618CDA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				07E99286D4F439B6A3CCB168 /* ChatView.swift in Sources */,
+				9260B3EB144AB356785404DB /* ContentView.swift in Sources */,
+				415DD10E20E81FF1B5BBE224 /* DashboardView.swift in Sources */,
+				1BC0ADE8B946A0938357952C /* FuturesBotApp.swift in Sources */,
+				EA38D03B1E87EF9257DB73C8 /* IndicatorEngine.swift in Sources */,
+				793984C70E29FBD15D82AF0E /* KnowledgeView.swift in Sources */,
+				F0CC7C5C12D2BD81C87538D9 /* LLMClient.swift in Sources */,
+				A3A3922E4652FB31659EAC7F /* MarketService.swift in Sources */,
+				C66AB56D222593B392621662 /* MonitorView.swift in Sources */,
+				C4CBADC575E1E51ABBD8E09B /* NotificationService.swift in Sources */,
+				900FDFC92971C043D5C637AF /* PositionCalculator.swift in Sources */,
+				DAA0DF236057FB87F68DCFFF /* Quote.swift in Sources */,
+				64580A1555E08BA1C74C4B32 /* SettingsView.swift in Sources */,
+				EAC37B53EE1F77154A6A1AB7 /* SignalEngine.swift in Sources */,
+				306B5C82F275FD3A6610E8A0 /* SinaAPI.swift in Sources */,
+				FDFE94E525F30531505F409B /* TradeDecisionView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		12454A271D3B93C73B131B24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FuturesBot;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.futuresbot.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		78A26D7D0EC73F1EFBACE65F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = FuturesBot/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FuturesBot;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9A05C5D2F49680D94B0D4D0E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FuturesBot;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.futuresbot.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AA204BE02794C3579FCD146F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = FuturesBot/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FuturesBot;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A267C1A4A77A4ED908FEC2B1 /* Build configuration list for PBXNativeTarget "FuturesBot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78A26D7D0EC73F1EFBACE65F /* Debug */,
+				AA204BE02794C3579FCD146F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DF239EA48C4FD8F6EC0F2DCA /* Build configuration list for PBXProject "FuturesBot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12454A271D3B93C73B131B24 /* Debug */,
+				9A05C5D2F49680D94B0D4D0E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C2DA5BAB1571E4AE1B202F15 /* Project object */;
+}

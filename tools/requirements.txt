@@ -1,0 +1,37 @@
+# Python dependencies for the futures monitoring toolchain
+# Install with: pip install -r requirements.txt
+
+# Market data (Chinese futures)
+akshare>=1.13.0
+
+# Data manipulation
+pandas>=2.0.0
+numpy>=1.24.0
+
+# HTTP for LLM and news APIs
+httpx>=0.25.0
+requests>=2.31.0
+
+# Async support
+anyio>=4.0.0
+
+# Config and env
+python-dotenv>=1.0.0
+tomli>=2.0.0; python_version<"3.11"
+
+# Technical indicators (lightweight; we mostly self-implement)
+ta>=0.10.2
+
+# Plotting (optional, for offline visual review)
+matplotlib>=3.7.0
+plotly>=5.17.0
+
+# Notifications (macOS native)
+# pync is optional; only needed for desktop notification
+pync>=2.0.3; sys_platform == "darwin"
+
+# Scheduling (only needed if running without Claude Code schedule skill)
+schedule>=1.2.0
+
+# JSON Schema (for config validation)
+jsonschema>=4.20.0

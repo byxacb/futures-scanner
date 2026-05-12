@@ -195,27 +195,60 @@ def evaluate(data: dict) -> dict:
 
 
 def send_bark(title: str, content: str) -> bool:
-    """推送到 Bark。"""
+    """推送到 Bark（GET 方式，更可靠）。"""
     if not BARK_URL:
         print("BARK_URL 未配置，跳过推送")
         return False
-    url = BARK_URL.rstrip("/")
-    payload = {
-        "title": title,
-        "body": content,
-        "sound": "anticipate",
-        "group": "期货比赛",
-        "level": "timeSensitive",
-        "isArchive": 1,
-    }
+    from urllib.parse import quote
+    bark = BARK_URL.rstrip("/")
+    title_enc = quote(title, safe="")
+    content_enc = quote(content[:500], safe="")
+    url = f"{bark}/{title_enc}/{content_enc}?sound=anticipate&group=期货比赛&isArchive=1&level=timeSensitive"
     try:
-        with httpx.Client(timeout=10) as c:
-            r = c.post(f"{url}/push", json=payload)
+        with httpx.Client(timeout=10, follow_redirects=True) as c:
+            r = c.get(url)
             ok = r.json().get("code") == 200
             print(f"  Bark: {'✅' if ok else '❌'}")
             return ok
     except Exception as e:
         print(f"  Bark 失败: {e}")
+        return False
+
+
+def send_email(title: str, content: str) -> bool:
+    """推送到邮箱。"""
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.utils import formataddr
+
+    host = os.environ.get("SMTP_HOST", "")
+    port = int(os.environ.get("SMTP_PORT", "465"))
+    user = os.environ.get("SMTP_USER", "")
+    password = os.environ.get("SMTP_PASSWORD", "")
+    to = os.environ.get("SMTP_TO", user)
+
+    if not all([host, user, password, to]):
+        print("  邮箱未配置，跳过")
+        return False
+
+    msg = MIMEText(content, "plain", "utf-8")
+    msg["Subject"] = title
+    msg["From"] = formataddr(("期货机器人", user))
+    msg["To"] = to
+
+    try:
+        if port == 465:
+            srv = smtplib.SMTP_SSL(host, port, timeout=15)
+        else:
+            srv = smtplib.SMTP(host, port, timeout=15)
+            srv.starttls()
+        srv.login(user, password)
+        srv.sendmail(user, [to], msg.as_string())
+        srv.quit()
+        print(f"  邮箱: ✅")
+        return True
+    except Exception as e:
+        print(f"  邮箱失败: {e}")
         return False
 
 
@@ -291,9 +324,12 @@ def main():
         title = f"发现 {len(opportunities)} 个交易机会"
         print(message)
         send_bark(title, message)
+        send_email(title, message)
     else:
         print("暂无高确信信号")
-        send_bark("市场扫描完成", "现在没有好机会，继续等。保持耐心，不要着急下单。")
+        msg = "现在没有好机会，继续等。保持耐心，不要着急下单。"
+        send_bark("市场扫描完成", msg)
+        send_email("市场扫描完成", msg)
 
     # 保存结果
     result = {
