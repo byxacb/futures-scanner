@@ -1,0 +1,47 @@
+name: 期货机会扫描
+
+# 北京时间 UTC+8，GitHub Actions 用 UTC
+# 上午盘 09:00-11:30 北京 = 01:00-03:30 UTC
+# 下午盘 13:30-15:00 北京 = 05:30-07:00 UTC
+# 夜盘 21:00-23:00 北京 = 13:00-15:00 UTC
+
+on:
+  schedule:
+    # 上午盘：09:00, 09:30, 10:00, 10:30, 11:00, 11:30
+    - cron: '0 1 * * 1-5'
+    - cron: '30 1 * * 1-5'
+    - cron: '0 2 * * 1-5'
+    - cron: '30 2 * * 1-5'
+    - cron: '0 3 * * 1-5'
+    - cron: '30 3 * * 1-5'
+    # 下午盘：13:30, 14:00, 14:30, 15:00
+    - cron: '30 5 * * 1-5'
+    - cron: '0 6 * * 1-5'
+    - cron: '30 6 * * 1-5'
+    - cron: '0 7 * * 1-5'
+    # 夜盘：21:00, 21:30, 22:00, 22:30, 23:00
+    - cron: '0 13 * * 1-5'
+    - cron: '30 13 * * 1-5'
+    - cron: '0 14 * * 1-5'
+    - cron: '30 14 * * 1-5'
+    - cron: '0 15 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install akshare httpx numpy
+
+      - name: 扫描期货机会
+        env:
+          BARK_URL: ${{ secrets.BARK_URL }}
+        run: python tools/research/cloud_scanner.py
