@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """云端扫描器 - GitHub Actions 运行，24小时自动找机会。
 
-独立运行，不依赖项目结构。
-直接抓 akshare 数据 → 分析 → 推送到手机。
+嵌入 100 本书 20 条铁律作为决策依据。
+评分公式：S = 0.4×收益 + 0.2×(1-回撤) + 0.3×夏普 + 0.1×(1-波动)
+60% 权重惩罚风险 → 受控激进，不是梭哈。
 """
 
 import json
@@ -13,9 +14,15 @@ import akshare as ak
 import httpx
 import numpy as np
 
-# Bark 推送配置（从 GitHub Secrets 读取）
 import os
 BARK_URL = os.environ.get("BARK_URL", "")
+
+# 导入 100 本书知识库
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from knowledge_base import RULES, get_rules_by_category, search_rules, get_stats
+
+# 评分公式权重
+SCORE_WEIGHTS = {"return": 0.4, "drawdown": 0.2, "sharpe": 0.3, "volatility": 0.1}
 
 # 候选品种
 CANDIDATES = {
@@ -115,7 +122,14 @@ def get_kline(symbol: str, days: int = 120) -> dict:
 
 
 def evaluate(data: dict) -> dict:
-    """评估信号，返回评分和操作建议。"""
+    """基于 100 本书铁律评估信号。
+
+    铁律应用：
+    - #6 顺势而为：MA20>MA60 才做多
+    - #7 量价配合：突破时成交量必须放大
+    - #14 盈亏比≥2:1：不满足就不做
+    - #19 评分公式偏爱低波动：波动太大扣分
+    """
     score = 0
     reasons = []
     direction = "wait"
@@ -128,62 +142,82 @@ def evaluate(data: dict) -> dict:
     donchian_high = data["donchian_high"]
     donchian_low = data["donchian_low"]
     macd_hist = data["macd_hist"]
+    vol_ratio = data["volume_last"] / data["volume_avg"] if data["volume_avg"] > 0 else 1
 
-    # 趋势判断
+    # === 铁律 #6：顺势而为 ===
     if ma20 > ma60 and price > ma20:
         score += 25
         direction = "buy"
-        reasons.append("价格在均线上方，趋势向上")
+        reasons.append("铁律#6 趋势向上（价格>MA20>MA60）")
     elif ma20 < ma60 and price < ma20:
         score += 20
         direction = "sell"
-        reasons.append("价格在均线下方，趋势向下")
+        reasons.append("铁律#6 趋势向下（价格<MA20<MA60）")
     else:
         score += 5
-        reasons.append("趋势不明确")
+        reasons.append("趋势不明确，观望")
 
-    # 突破确认
+    # === 铁律 #7：突破必须放量 ===
     if price >= donchian_high * 0.99:
-        score += 20
-        reasons.append("突破20天最高价")
-    elif price <= donchian_low * 1.01:
-        score += 15
-        reasons.append("跌破20天最低价")
+        if vol_ratio >= 1.2:
+            score += 20
+            reasons.append(f"铁律#7 放量突破（量比{vol_ratio:.1f}倍）")
+        else:
+            score += 5
+            reasons.append("突破但没放量，可能是假突破")
 
-    # RSI
-    if 40 <= rsi <= 60:
-        score += 15
-    elif rsi > 70:
+    # RSI 超买超卖
+    if rsi > 70:
         score -= 10
-        reasons.append("涨太多了，可能回调")
+        reasons.append("RSI超买，可能回调")
     elif rsi < 30:
         score -= 10
-        reasons.append("跌太多了，可能反弹")
+        reasons.append("RSI超卖，可能反弹")
 
-    # MACD
+    # MACD 动量
     if direction == "buy" and macd_hist > 0:
         score += 15
-        reasons.append("上涨动力还在")
+        reasons.append("MACD多头动量")
     elif direction == "sell" and macd_hist < 0:
         score += 15
-        reasons.append("下跌动力还在")
+        reasons.append("MACD空头动量")
 
-    # 成交量
-    if data["volume_last"] > data["volume_avg"] * 1.3:
+    # 成交量放大
+    if vol_ratio > 1.3:
         score += 10
-        reasons.append("成交量放大")
+        reasons.append(f"成交量放大{vol_ratio:.1f}倍")
 
-    # 止损目标
+    # === 铁律 #14：盈亏比≥2:1 ===
     if atr > 0:
         if direction == "buy":
             stop_loss = round(price - 2 * atr, 0)
             target = round(price + 3 * atr, 0)
-        else:
+        elif direction == "sell":
             stop_loss = round(price + 2 * atr, 0)
             target = round(price - 3 * atr, 0)
+        else:
+            stop_loss = 0
+            target = 0
     else:
         stop_loss = round(price * 0.97, 0) if direction == "buy" else round(price * 1.03, 0)
         target = round(price * 1.05, 0) if direction == "buy" else round(price * 0.95, 0)
+
+    # 盈亏比检查
+    if stop_loss > 0 and target > 0:
+        risk = abs(price - stop_loss)
+        reward = abs(target - price)
+        rr_ratio = reward / risk if risk > 0 else 0
+        if rr_ratio < 2:
+            score -= 15
+            reasons.append(f"盈亏比{rr_ratio:.1f}:1 < 2:1，铁律#14不满足")
+        else:
+            reasons.append(f"盈亏比{rr_ratio:.1f}:1 ✓")
+
+    # === 铁律 #19：评分公式偏爱低波动 ===
+    volatility_pct = atr / price * 100 if price > 0 else 0
+    if volatility_pct > 3:
+        score -= 10
+        reasons.append(f"波动率{volatility_pct:.1f}%偏高，评分公式会扣分")
 
     return {
         "score": min(max(score, 0), 100),
@@ -253,9 +287,12 @@ def send_email(title: str, content: str) -> bool:
 
 
 def format_message(opportunities: list) -> str:
-    """大白话格式。"""
+    """大白话格式，附带相关书本知识。"""
     if not opportunities:
         return "现在没有好机会，继续等。别着急下单。"
+
+    # 获取知识库统计
+    stats = get_stats()
 
     lines = []
     for i, opp in enumerate(opportunities[:3], 1):
@@ -279,12 +316,25 @@ def format_message(opportunities: list) -> str:
         lines.append(f"【为什么】{' | '.join(opp['reasons'])}")
         lines.append("")
 
+        # 添加相关书本知识
+        if is_buy:
+            relevant = search_rules("趋势") + search_rules("突破") + search_rules("动量")
+        else:
+            relevant = search_rules("止损") + search_rules("风控")
+        if relevant:
+            lines.append("【参考知识】")
+            for rule in relevant[:3]:
+                lines.append(f"  • {rule[1]}（{rule[2]}）")
+            lines.append("")
+
     lines.append("="*20)
-    lines.append("重要提醒")
+    lines.append(f"知识库：{stats['total_rules']}条规则，{stats['books_covered']}本书")
     lines.append("="*20)
-    lines.append("• 每个品种最多花30%的钱")
-    lines.append("• 一定要设止损")
-    lines.append("• 不确定就不做")
+    lines.append("• 铁律#5：止损必须挂，不挂不下单")
+    lines.append("• 铁律#3：每个品种最多花30%的钱")
+    lines.append("• 铁律#14：盈亏比≥2:1才值得做")
+    lines.append("• 铁律#12：大部分时间什么都不做")
+    lines.append("• 不确定就不做，等下一个机会")
 
     return "\n".join(lines)
 
