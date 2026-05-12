@@ -24,29 +24,73 @@ from knowledge_base import RULES, get_rules_by_category, search_rules, get_stats
 # 评分公式权重
 SCORE_WEIGHTS = {"return": 0.4, "drawdown": 0.2, "sharpe": 0.3, "volatility": 0.1}
 
-# 候选品种
+# 55个品种全覆盖
 CANDIDATES = {
-    "rb": {"name": "螺纹钢", "symbol": "RB0", "exchange": "shfe"},
-    "hc": {"name": "热卷", "symbol": "HC0", "exchange": "shfe"},
-    "i":  {"name": "铁矿石", "symbol": "I0", "exchange": "dce"},
-    "j":  {"name": "焦炭", "symbol": "J0", "exchange": "dce"},
-    "jm": {"name": "焦煤", "symbol": "JM0", "exchange": "dce"},
-    "cu": {"name": "铜", "symbol": "CU0", "exchange": "shfe"},
-    "al": {"name": "铝", "symbol": "AL0", "exchange": "shfe"},
-    "zn": {"name": "锌", "symbol": "ZN0", "exchange": "shfe"},
-    "ni": {"name": "镍", "symbol": "NI0", "exchange": "shfe"},
-    "sc": {"name": "原油", "symbol": "SC0", "exchange": "ine"},
-    "TA": {"name": "PTA", "symbol": "TA0", "exchange": "czce"},
-    "MA": {"name": "甲醇", "symbol": "MA0", "exchange": "czce"},
-    "FG": {"name": "玻璃", "symbol": "FG0", "exchange": "czce"},
-    "SA": {"name": "纯碱", "symbol": "SA0", "exchange": "czce"},
-    "m":  {"name": "豆粕", "symbol": "M0", "exchange": "dce"},
-    "y":  {"name": "豆油", "symbol": "Y0", "exchange": "dce"},
-    "p":  {"name": "棕榈油", "symbol": "P0", "exchange": "dce"},
-    "CF": {"name": "棉花", "symbol": "CF0", "exchange": "czce"},
-    "SR": {"name": "白糖", "symbol": "SR0", "exchange": "czce"},
-    "au": {"name": "黄金", "symbol": "AU0", "exchange": "shfe"},
-    "ag": {"name": "白银", "symbol": "AG0", "exchange": "shfe"},
+    # 黑色系 (6)
+    "rb": {"name": "螺纹钢", "symbol": "RB0"},
+    "hc": {"name": "热卷", "symbol": "HC0"},
+    "i":  {"name": "铁矿石", "symbol": "I0"},
+    "j":  {"name": "焦炭", "symbol": "J0"},
+    "jm": {"name": "焦煤", "symbol": "JM0"},
+    "SS": {"name": "不锈钢", "symbol": "SS0"},
+    # 硅锰硅铁 (2)
+    "SF": {"name": "硅铁", "symbol": "SF0"},
+    "SM": {"name": "锰硅", "symbol": "SM0"},
+    # 有色 (6)
+    "cu": {"name": "铜", "symbol": "CU0"},
+    "al": {"name": "铝", "symbol": "AL0"},
+    "zn": {"name": "锌", "symbol": "ZN0"},
+    "pb": {"name": "铅", "symbol": "PB0"},
+    "ni": {"name": "镍", "symbol": "NI0"},
+    "sn": {"name": "锡", "symbol": "SN0"},
+    # 贵金属 (2)
+    "au": {"name": "黄金", "symbol": "AU0"},
+    "ag": {"name": "白银", "symbol": "AG0"},
+    # 能化 (12)
+    "sc": {"name": "原油", "symbol": "SC0"},
+    "fu": {"name": "燃料油", "symbol": "FU0"},
+    "bu": {"name": "沥青", "symbol": "BU0"},
+    "ru": {"name": "橡胶", "symbol": "RU0"},
+    "sp": {"name": "纸浆", "symbol": "SP0"},
+    "TA": {"name": "PTA", "symbol": "TA0"},
+    "MA": {"name": "甲醇", "symbol": "MA0"},
+    "FG": {"name": "玻璃", "symbol": "FG0"},
+    "SA": {"name": "纯碱", "symbol": "SA0"},
+    "eg": {"name": "乙二醇", "symbol": "EG0"},
+    "eb": {"name": "苯乙烯", "symbol": "EB0"},
+    "pp": {"name": "聚丙烯", "symbol": "PP0"},
+    # 塑料 (3)
+    "v":  {"name": "PVC", "symbol": "V0"},
+    "l":  {"name": "塑料", "symbol": "L0"},
+    "pg": {"name": "液化气", "symbol": "PG0"},
+    # 农产品 (11)
+    "m":  {"name": "豆粕", "symbol": "M0"},
+    "y":  {"name": "豆油", "symbol": "Y0"},
+    "p":  {"name": "棕榈油", "symbol": "P0"},
+    "c":  {"name": "玉米", "symbol": "C0"},
+    "cs": {"name": "淀粉", "symbol": "CS0"},
+    "CF": {"name": "棉花", "symbol": "CF0"},
+    "SR": {"name": "白糖", "symbol": "SR0"},
+    "OI": {"name": "菜油", "symbol": "OI0"},
+    "RM": {"name": "菜粕", "symbol": "RM0"},
+    "AP": {"name": "苹果", "symbol": "AP0"},
+    "CJ": {"name": "红枣", "symbol": "CJ0"},
+    # 农产品2 (3)
+    "pk": {"name": "花生", "symbol": "PK0"},
+    "PF": {"name": "短纤", "symbol": "PF0"},
+    "ur": {"name": "尿素", "symbol": "UR0"},
+    # 金融期货 (8)
+    "IF": {"name": "沪深300", "symbol": "IF0"},
+    "IC": {"name": "中证500", "symbol": "IC0"},
+    "IH": {"name": "上证50", "symbol": "IH0"},
+    "IM": {"name": "中证1000", "symbol": "IM0"},
+    "T":  {"name": "10年国债", "symbol": "T0"},
+    "TF": {"name": "5年国债", "symbol": "TF0"},
+    "TS": {"name": "2年国债", "symbol": "TS0"},
+    "TL": {"name": "30年国债", "symbol": "TL0"},
+    # 广期所 (2)
+    "SI": {"name": "工业硅", "symbol": "SI0"},
+    "LC": {"name": "碳酸锂", "symbol": "LC0"},
 }
 
 
