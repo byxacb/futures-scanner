@@ -376,10 +376,7 @@ def main():
         send_bark(title, message)
         send_email(title, message)
     else:
-        print("暂无高确信信号")
-        msg = "现在没有好机会，继续等。保持耐心，不要着急下单。"
-        send_bark("市场扫描完成", msg)
-        send_email("市场扫描完成", msg)
+        print("暂无高确信信号，不推送，继续等")
 
     # 保存结果
     result = {

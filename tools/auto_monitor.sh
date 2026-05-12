@@ -88,7 +88,7 @@ if (9 <= hour < 12) or (13 <= hour < 15):
             notify('🔔 螺纹钢快到止损位了', msg, level='warn')
 
         else:
-            print(f'RB现价: {price}，正常区间，不用管')
+            print(f'RB现价: {price}，正常区间，不推送')
     else:
         print('无法获取实时价格')
 else:
