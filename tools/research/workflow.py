@@ -391,11 +391,11 @@ def format_message(opportunities: list) -> str:
         lines.append("")
         if is_buy:
             lines.append(f"1. 合约 → {contract_code}")
-            lines.append(f"2. 当行情价格 ≥ {entry}")
+            lines.append(f"2. 当行情价格 ≤ {entry}")
             lines.append(f"3. 委托方向 → 买入开仓")
         else:
             lines.append(f"1. 合约 → {contract_code}")
-            lines.append(f"2. 当行情价格 ≤ {entry}")
+            lines.append(f"2. 当行情价格 ≥ {entry}")
             lines.append(f"3. 委托方向 → 卖出开仓")
         lines.append(f"4. 委托价格 → 对手价")
         lines.append(f"5. 委托数量 → 根据资金定（单品种≤30%）")
