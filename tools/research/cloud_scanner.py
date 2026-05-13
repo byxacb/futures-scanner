@@ -693,10 +693,11 @@ def main():
         send_email(title, message)
     else:
         print("暂无高确信信号，不推送")
-        # 每4小时发一条心跳消息
+        # 每4小时发一条心跳消息，附带新闻抓取诊断
         now = datetime.now()
         if now.hour in (8, 12, 16, 20) and now.minute < 10:
-            msg = f"系统正常工作中\n已扫描{len(CANDIDATES)}个品种，暂无高确信信号\n\n发现机会时自动推送操作步骤"
+            diag = f"✅ 新闻抓到{len(all_news)}条 扫描{len(CANDIDATES)}品种全部完成" if all_news else f"❌ 新闻抓取失败 已扫描{len(CANDIDATES)}品种"
+            msg = f"系统正常工作中\n扫描{len(CANDIDATES)}品种 | 暂无高确信信号\n{diag}\n\n发现机会时自动推送操作步骤"
             send_bark("期货扫描器心跳", msg)
             send_email("期货扫描器心跳", msg)
 
