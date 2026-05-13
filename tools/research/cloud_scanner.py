@@ -12,6 +12,7 @@ import sys
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 from dataclasses import dataclass
+from typing import Optional
 
 import akshare as ak
 import httpx
@@ -157,6 +158,8 @@ def get_news_for_product(name: str) -> dict:
 # 评分公式权重
 SCORE_WEIGHTS = {"return": 0.4, "drawdown": 0.2, "sharpe": 0.3, "volatility": 0.1}
 
+FINANCIAL_KEYS = {"IF", "IC", "IH", "IM", "T", "TF", "TS", "TL"}
+
 # 55个品种全覆盖
 CANDIDATES = {
     # 黑色系 (6)
@@ -298,6 +301,25 @@ def get_kline(symbol: str, days: int = 120) -> dict:
         return None
 
 
+def get_realtime_price(symbol: str, key: str) -> Optional[dict]:
+    """获取实时价格（优先），失败时返回 None。"""
+    market = "FF" if key in FINANCIAL_KEYS else "CF"
+    try:
+        spot = ak.futures_zh_spot(symbol=symbol, market=market, adjust="0")
+        if spot is None or len(spot) == 0:
+            return None
+        row = spot.iloc[0]
+        return {
+            "price": float(row.get("current_price")),
+            "time": str(row.get("time", "")),
+            "market": market,
+            "bid": float(row.get("bid_price", 0) or 0),
+            "ask": float(row.get("ask_price", 0) or 0),
+        }
+    except Exception:
+        return None
+
+
 def evaluate(data: dict, news: dict = None) -> dict:
     """基于 100 本书铁律评估信号。
 
@@ -403,6 +425,7 @@ def evaluate(data: dict, news: dict = None) -> dict:
         target = round(price * 1.05, 0) if direction == "buy" else round(price * 0.95, 0)
 
     # 盈亏比检查
+    rr_ratio = 0.0
     if stop_loss > 0 and target > 0:
         risk = abs(price - stop_loss)
         reward = abs(target - price)
@@ -448,6 +471,8 @@ def evaluate(data: dict, news: dict = None) -> dict:
         "reasons": reasons,
         "stop_loss": stop_loss,
         "target": target,
+        "rr_ratio": rr_ratio,
+        "trigger": round(donchian_high if direction == "buy" else donchian_low, 0),
         "news": news,
     }
 
@@ -465,7 +490,11 @@ def send_bark(title: str, content: str) -> bool:
     try:
         with httpx.Client(timeout=10, follow_redirects=True) as c:
             r = c.get(url)
-            ok = r.json().get("code") == 200
+            ok = False
+            try:
+                ok = r.json().get("code") == 200
+            except Exception:
+                ok = r.status_code == 200
             print(f"  Bark: {'✅' if ok else '❌'}")
             return ok
     except Exception as e:
@@ -545,11 +574,15 @@ def format_message(opportunities: list) -> str:
         entry = opp["entry"]
         stop_loss = opp["stop_loss"]
         target = opp["target"]
+        trigger = opp["trigger"]
+        spot_price = opp.get("spot_price", entry)
+        spot_time = opp.get("spot_time", "")
 
         lines.append(f"{'='*25}")
         lines.append(f"机会{i}：{name}（{contract_code}）")
         lines.append(f"{'='*25}")
         lines.append(f"确信度 {opp['score']}分/100")
+        lines.append(f"实时价 {spot_price}（更新时间 {spot_time or '未知'}）")
         lines.append(f"{'─'*25}")
         lines.append("")
 
@@ -558,7 +591,7 @@ def format_message(opportunities: list) -> str:
         lines.append("")
         if is_buy:
             lines.append(f"1. 合约 → {contract_code}")
-            lines.append(f"2. 当行情价格 ≤ {entry}")
+            lines.append(f"2. 当行情价格 ≥ {trigger}")
             lines.append(f"3. 委托方向 → 买入开仓")
             lines.append(f"4. 委托价格 → 对手价")
             lines.append(f"5. 委托数量 → 根据资金定（单品种≤30%）")
@@ -566,7 +599,7 @@ def format_message(opportunities: list) -> str:
             lines.append(f"7. 点提交")
         else:
             lines.append(f"1. 合约 → {contract_code}")
-            lines.append(f"2. 当行情价格 ≥ {entry}")
+            lines.append(f"2. 当行情价格 ≤ {trigger}")
             lines.append(f"3. 委托方向 → 卖出开仓")
             lines.append(f"4. 委托价格 → 对手价")
             lines.append(f"5. 委托数量 → 根据资金定（单品种≤30%）")
@@ -646,6 +679,8 @@ def main():
         print(f"  [网络] 头条: {all_news[0].get('title','')[:60]}")
 
     opportunities = []
+    total_data_ok = 0
+    total_spot_ok = 0
 
     for key, info in CANDIDATES.items():
         symbol = info["symbol"]
@@ -655,6 +690,12 @@ def main():
         data = get_kline(symbol)
         if not data:
             continue
+        total_data_ok += 1
+
+        spot = get_realtime_price(symbol, key)
+        if spot and spot.get("price", 0) > 0:
+            data["price"] = spot["price"]  # 用实时价驱动触发和推送
+            total_spot_ok += 1
 
         # 从已经抓到的新闻里用关键词过滤
         news_items = [n for n in all_news if name in n.get("title", "")]
@@ -664,9 +705,28 @@ def main():
         news = analyze_news_sentiment(news_items)
 
         result = evaluate(data, news)
-        print(f"    -> 得分={result['score']} 方向={result['direction']} 新闻面={news['sentiment']}({news['score']}分)")
+        print(
+            f"    -> 得分={result['score']} 方向={result['direction']} "
+            f"新闻面={news['sentiment']}({news['score']}分) 实时价={data['price']:.2f}"
+        )
 
-        if result["score"] >= 50 and result["direction"] in ("buy", "sell"):
+        if result["score"] >= 55 and result["direction"] in ("buy", "sell"):
+            if result.get("rr_ratio", 0) < 2:
+                continue
+            trigger = result["trigger"]
+            px = data["price"]
+            atr = data["atr"]
+
+            # 只有“现在需要操作”才推送，避免每5分钟重复废消息
+            if result["direction"] == "buy":
+                actionable = px >= trigger * 0.998
+            else:
+                actionable = px <= trigger * 1.002
+            if atr > 0:
+                actionable = actionable or abs(px - trigger) <= atr * 0.2
+            if not actionable:
+                continue
+
             sentiment_map = {"bullish": "偏多", "bearish": "偏空", "neutral": "中性"}
             news["sentiment_label"] = sentiment_map.get(news["sentiment"], "中性")
             opportunities.append({
@@ -675,6 +735,9 @@ def main():
                 "direction": result["direction"],
                 "score": result["score"],
                 "entry": round(data["price"], 0),
+                "trigger": trigger,
+                "spot_price": round(data["price"], 2),
+                "spot_time": spot["time"] if spot else "",
                 "stop_loss": result["stop_loss"],
                 "target": result["target"],
                 "reasons": result["reasons"],
@@ -692,20 +755,15 @@ def main():
         send_bark(title, message)
         send_email(title, message)
     else:
-        print("暂无高确信信号，不推送")
-        # 每4小时发一条心跳消息，附带新闻抓取诊断
-        now = datetime.now()
-        if now.hour in (8, 12, 16, 20) and now.minute < 10:
-            diag = f"✅ 新闻抓到{len(all_news)}条 扫描{len(CANDIDATES)}品种全部完成" if all_news else f"❌ 新闻抓取失败 已扫描{len(CANDIDATES)}品种"
-            msg = f"系统正常工作中\n扫描{len(CANDIDATES)}品种 | 暂无高确信信号\n{diag}\n\n发现机会时自动推送操作步骤"
-            send_bark("期货扫描器心跳", msg)
-            send_email("期货扫描器心跳", msg)
+        print("暂无可执行机会（不推送，避免噪音）")
 
     # 保存 debug 日志到 daily/ 供本地查看云端状态
     result = {
         "timestamp": datetime.now().isoformat(),
         "count": len(opportunities),
         "news_count": len(all_news),
+        "data_ok": total_data_ok,
+        "spot_ok": total_spot_ok,
         "opportunities": opportunities,
     }
     debug_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "daily", "last_scan_debug.json")

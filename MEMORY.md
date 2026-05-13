@@ -13,6 +13,26 @@
 - **API Key**：MiMo via token-plan 已配置在 .env，端到端通
 - **新增**：lessons_learned.md（工具/策略复盘日志）、multi_perspective_analysis.md（多视角分析框架）
 
+## 当前状态（2026-05-13）
+
+- 用户最新核心诉求：云端每5分钟必须“真分析”，不是固定文案重复推送
+- 已修复 `tools/research/cloud_scanner.py`：
+  1. 引入 `ak.futures_zh_spot` 实时价格（优先）驱动触发
+  2. 开仓触发改为突破价：做多用 `>= trigger`，做空用 `<= trigger`
+  3. 增加“仅可执行才推送”逻辑，避免无操作价值噪音
+  4. 增加盈亏比硬过滤：`rr_ratio < 2` 一律不推送
+  5. Bark 解析容错增强（非 JSON 响应也能判定）
+  6. 每轮写 `daily/last_scan_debug.json`，记录 `news_count/data_ok/spot_ok`
+- 本地验证证据：
+  - 运行 `python3 -u tools/research/cloud_scanner.py`
+  - 输出显示：联网抓到新闻 31 条；扫描 55 品种；实时价字段持续刷新
+  - 最新 debug 文件：
+    - `timestamp`: 2026-05-13T14:22:14
+    - `news_count`: 31
+    - `data_ok`: 18
+    - `spot_ok`: 17
+    - `count`: 0（本轮无可执行机会，因此按规则不推送）
+
 ## 已交付清单（150+ 文件）
 
 | 模块 | 文件数 | 说明 |
