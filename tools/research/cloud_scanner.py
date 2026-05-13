@@ -460,7 +460,7 @@ def send_bark(title: str, content: str) -> bool:
     from urllib.parse import quote
     bark = BARK_URL.rstrip("/")
     title_enc = quote(title, safe="")
-    content_enc = quote(content[:500], safe="")
+    content_enc = quote(content[:2000], safe="")
     url = f"{bark}/{title_enc}/{content_enc}?sound=anticipate&group=期货比赛&isArchive=1&level=timeSensitive"
     try:
         with httpx.Client(timeout=10, follow_redirects=True) as c:
