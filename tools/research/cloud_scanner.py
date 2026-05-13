@@ -197,9 +197,14 @@ def evaluate(data: dict) -> dict:
         score += 20
         direction = "sell"
         reasons.append("铁律#6 趋势向下（价格<MA20<MA60）")
-    else:
-        score += 5
-        reasons.append("趋势不明确，观望")
+    elif price > ma20:
+        score += 10
+        direction = "buy"
+        reasons.append("价格在MA20上方")
+    elif price < ma20:
+        score += 8
+        direction = "sell"
+        reasons.append("价格在MA20下方")
 
     # === 铁律 #7：突破必须放量 ===
     if price >= donchian_high * 0.99:
@@ -207,8 +212,15 @@ def evaluate(data: dict) -> dict:
             score += 20
             reasons.append(f"铁律#7 放量突破（量比{vol_ratio:.1f}倍）")
         else:
+            score += 8
+            reasons.append("突破但未放量，谨慎")
+    elif price <= donchian_low * 1.01:
+        if vol_ratio >= 1.2:
+            score += 18
+            reasons.append(f"铁律#7 放量跌破（量比{vol_ratio:.1f}倍）")
+        else:
             score += 5
-            reasons.append("突破但没放量，可能是假突破")
+            reasons.append("跌破但未放量")
 
     # RSI 超买超卖
     if rsi > 70:
@@ -398,7 +410,7 @@ def main():
             continue
 
         result = evaluate(data)
-        if result["score"] >= 60 and result["direction"] in ("buy", "sell"):
+        if result["score"] >= 50 and result["direction"] in ("buy", "sell"):
             opportunities.append({
                 "symbol": key,
                 "name": name,
@@ -420,7 +432,13 @@ def main():
         send_bark(title, message)
         send_email(title, message)
     else:
-        print("暂无高确信信号，不推送，继续等")
+        print("暂无高确信信号，不推送")
+        # 每4小时发一条心跳消息（8:00/12:00/16:00/20:00）
+        now = datetime.now()
+        if now.hour in (8, 12, 16, 20) and now.minute < 10:
+            msg = f"系统正常工作中\n已扫描{len(CANDIDATES)}个品种，暂无高确信信号\n\n发现机会时自动推送操作步骤"
+            send_bark("期货扫描器心跳", msg)
+            send_email("期货扫描器心跳", msg)
 
     # 保存结果
     result = {
