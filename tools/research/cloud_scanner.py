@@ -1,25 +1,158 @@
 #!/usr/bin/env python3
-"""云端扫描器 - GitHub Actions 运行，24小时自动找机会。
+"""云端扫描器 - GitHub Actions 运行，24 小时自动找机会。
 
-嵌入 100 本书 20 条铁律作为决策依据。
-评分公式：S = 0.4×收益 + 0.2×(1-回撤) + 0.3×夏普 + 0.1×(1-波动)
-60% 权重惩罚风险 → 受控激进，不是梭哈。
+嵌入 100 本书 20 条铁律 + 联网搜索新闻/基本面作为决策依据。
+评分维度：技术面(70%) + 新闻面(15%) + 风控(15%)
 """
 
 import json
+import os
+import re
 import sys
 from datetime import datetime, timedelta
+from html.parser import HTMLParser
+from dataclasses import dataclass
 
 import akshare as ak
 import httpx
 import numpy as np
 
-import os
 BARK_URL = os.environ.get("BARK_URL", "")
 
 # 导入 100 本书知识库
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from knowledge_base import RULES, get_rules_by_category, search_rules, get_stats
+
+
+# ============================================================
+# 联网新闻抓取（mysteel）
+# ============================================================
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+}
+
+
+class _TextExtractor(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.texts = []
+    def handle_starttag(self, tag, attrs):
+        pass
+    def handle_data(self, data):
+        t = data.strip()
+        if len(t) > 10:
+            self.texts.append(t)
+
+
+@dataclass
+class NewsItem:
+    title: str
+    url: str
+    summary: str
+    date: str
+
+
+def _fetch_article_summary(url: str, max_chars: int = 300) -> str:
+    """抓单篇文章摘要。"""
+    try:
+        r = httpx.get(url, timeout=8, follow_redirects=True, headers=HEADERS)
+        parser = _TextExtractor()
+        parser.feed(r.text)
+        content = " ".join(parser.texts)
+        content = re.sub(r'©.*?保留所有权利', '', content)
+        content = re.sub(r'免责声明.*', '', content)
+        return content[:max_chars].strip()
+    except Exception:
+        return ""
+
+
+def fetch_news(keywords: list[str], limit: int = 5) -> list[dict]:
+    """从 mysteel 抓取相关新闻。返回 [{"title":..., "url":..., "date":...}]。"""
+    url = "https://news.mysteel.com/"
+    items = []
+    try:
+        r = httpx.get(url, timeout=12, follow_redirects=True, headers=HEADERS)
+        pattern = r'href="(https://news\.mysteel\.com/a/[^"]+)"\s+title="([^"]+)"'
+        matches = re.findall(pattern, r.text)
+        seen_urls = set()
+        for article_url, title in matches:
+            if article_url in seen_urls:
+                continue
+            seen_urls.add(article_url)
+            if not any(kw in title for kw in keywords):
+                continue
+            date_match = re.search(r'/(\d{6})(\d{2})/', article_url)
+            date_str = ""
+            if date_match:
+                ym = date_match.group(1)
+                day = date_match.group(2)
+                date_str = f"20{ym[:2]}-{ym[2:]}-{day}"
+            summary = _fetch_article_summary(article_url)
+            items.append({"title": title, "url": article_url, "date": date_str, "summary": summary})
+            if len(items) >= limit:
+                break
+    except Exception as e:
+        print(f"  [新闻] mysteel 抓取失败: {e}")
+    return items
+
+
+def analyze_news_sentiment(news_items: list[dict]) -> dict:
+    """分析新闻情绪，返回 sentiment + 修正分数。"""
+    if not news_items:
+        return {"sentiment": "neutral", "score": 0, "titles": [], "keywords_found": []}
+    bullish_words = ["上涨", "突破", "新高", "涨价", "需求好", "减产", "挺价", "缺口", "偏强", "上行", "去库"]
+    bearish_words = ["下跌", "暴跌", "库存高", "过剩", "累库", "需求弱", "低迷", "偏弱", "下行", "降价", "观望"]
+    bull_count = 0
+    bear_count = 0
+    found_kw = set()
+    for item in news_items:
+        title = item.get("title", "")
+        for w in bullish_words:
+            if w in title:
+                bull_count += 1
+                found_kw.add(w)
+        for w in bearish_words:
+            if w in title:
+                bear_count += 1
+                found_kw.add(w)
+    sentiment = "bullish" if bull_count > bear_count else "bearish" if bear_count > bull_count else "neutral"
+    score = min(bull_count + bear_count, 15)  # 最多 15 分新闻面
+    return {
+        "sentiment": sentiment,
+        "score": score,
+        "titles": [item.get("title", "") for item in news_items[:3]],
+        "keywords_found": list(found_kw),
+    }
+
+
+def get_news_for_product(name: str) -> dict:
+    """获取某个品种的相关新闻并做情绪分析。"""
+    kw_map = {
+        "螺纹钢": ["螺纹钢", "螺纹", "钢材"], "热卷": ["热卷", "热轧"],
+        "铁矿石": ["铁矿石", "铁矿"], "焦炭": ["焦炭"], "焦煤": ["焦煤"],
+        "不锈钢": ["不锈钢"], "硅铁": ["硅铁"], "锰硅": ["锰硅", "硅锰"],
+        "铜": ["铜"], "铝": ["铝", "电解铝"], "锌": ["锌"], "铅": ["铅"],
+        "镍": ["镍"], "锡": ["锡"], "黄金": ["黄金"], "白银": ["白银"],
+        "原油": ["原油", "SC"], "燃料油": ["燃料油"], "沥青": ["沥青"],
+        "橡胶": ["橡胶"], "纸浆": ["纸浆"], "PTA": ["PTA"],
+        "甲醇": ["甲醇"], "玻璃": ["玻璃", "FG"],
+        "纯碱": ["纯碱"], "乙二醇": ["乙二醇", "EG"],
+        "苯乙烯": ["苯乙烯", "EB"], "聚丙烯": ["聚丙烯", "PP"],
+        "PVC": ["PVC"], "塑料": ["塑料", "PE"], "液化气": ["液化气", "LPG"],
+        "豆粕": ["豆粕"], "豆油": ["豆油"], "棕榈油": ["棕榈油"],
+        "玉米": ["玉米"], "淀粉": ["淀粉"], "棉花": ["棉花"],
+        "白糖": ["白糖"], "菜油": ["菜油"], "菜粕": ["菜粕"],
+        "苹果": ["苹果"], "红枣": ["红枣"], "花生": ["花生"],
+        "短纤": ["短纤", "PF"], "尿素": ["尿素"],
+        "沪深300": ["股指", "沪深300", "A股"], "中证500": ["中证500"],
+        "上证50": ["上证50"], "中证1000": ["中证1000"],
+        "10年国债": ["国债"], "5年国债": ["国债"], "2年国债": ["国债"], "30年国债": ["国债"],
+        "工业硅": ["工业硅"], "碳酸锂": ["碳酸锂"],
+    }
+    keywords = kw_map.get(name, [name])
+    items = fetch_news(keywords, limit=5)
+    result = analyze_news_sentiment(items)
+    return result
 
 # 评分公式权重
 SCORE_WEIGHTS = {"return": 0.4, "drawdown": 0.2, "sharpe": 0.3, "volatility": 0.1}
@@ -165,8 +298,17 @@ def get_kline(symbol: str, days: int = 120) -> dict:
         return None
 
 
-def evaluate(data: dict) -> dict:
+def evaluate(data: dict, news: dict = None) -> dict:
     """基于 100 本书铁律评估信号。
+
+    评分维度（满分100）：
+    - 趋势方向（25分）
+    - 突破/放量（20分）
+    - 成交量（10分）
+    - 盈亏比（15分）
+    - 波动率（10分）
+    - 新闻面（15分）
+    - RSI/MACD偏差（5分修正）
 
     铁律应用：
     - #6 顺势而为：MA20>MA60 才做多
@@ -174,6 +316,8 @@ def evaluate(data: dict) -> dict:
     - #14 盈亏比≥2:1：不满足就不做
     - #19 评分公式偏爱低波动：波动太大扣分
     """
+    if news is None:
+        news = {"sentiment": "neutral", "score": 0, "titles": []}
     score = 0
     reasons = []
     direction = "wait"
@@ -275,12 +419,36 @@ def evaluate(data: dict) -> dict:
         score -= 10
         reasons.append(f"波动率{volatility_pct:.1f}%偏高，评分公式会扣分")
 
+    # === 新闻面评分（15 分） ===
+    if news["score"] > 0:
+        if news["sentiment"] == "bullish" and direction == "buy":
+            score += news["score"]
+            reasons.append(f"新闻面偏多（{len(news['titles'])}条相关新闻）")
+            if news.get("keywords_found"):
+                reasons.append(f"新闻关键词：{'、'.join(news['keywords_found'][:4])}")
+        elif news["sentiment"] == "bearish" and direction == "sell":
+            score += news["score"]
+            reasons.append(f"新闻面偏空（{len(news['titles'])}条相关新闻）")
+            if news.get("keywords_found"):
+                reasons.append(f"新闻关键词：{'、'.join(news['keywords_found'][:4])}")
+        elif news["sentiment"] == "neutral" and news["score"] > 0:
+            score += news["score"] // 2
+            reasons.append(f"新闻面中性（{len(news['titles'])}条相关新闻）")
+        # 新闻与信号反向时扣分
+        elif news["sentiment"] == "bullish" and direction == "sell":
+            score -= news["score"]
+            reasons.append(f"新闻面偏多但信号偏空，冲突扣分")
+        elif news["sentiment"] == "bearish" and direction == "buy":
+            score -= news["score"]
+            reasons.append(f"新闻面偏空但信号偏多，冲突扣分")
+
     return {
         "score": min(max(score, 0), 100),
         "direction": direction,
         "reasons": reasons,
         "stop_loss": stop_loss,
         "target": target,
+        "news": news,
     }
 
 
@@ -446,6 +614,13 @@ def format_message(opportunities: list) -> str:
 
         # === 原因 ===
         lines.append(f"【为什么做】{' | '.join(opp['reasons'])}")
+
+        # 新闻面
+        if opp.get("news") and opp["news"].get("titles"):
+            lines.append("")
+            lines.append(f"【最新新闻】({opp['news']['sentiment_label']})")
+            for t in opp["news"]["titles"][:2]:
+                lines.append(f"  · {t}")
         lines.append("")
 
     lines.append("="*25)
@@ -462,6 +637,11 @@ def format_message(opportunities: list) -> str:
 def main():
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 开始扫描 {len(CANDIDATES)} 个品种...")
 
+    # 先批量抓一次综合新闻（一次请求，不用每个品种都请求）
+    print("  抓取全网期货新闻...")
+    all_news = fetch_news(["期货"], limit=40)
+    print(f"  共抓到 {len(all_news)} 条期货新闻")
+
     opportunities = []
 
     for key, info in CANDIDATES.items():
@@ -473,8 +653,17 @@ def main():
         if not data:
             continue
 
-        result = evaluate(data)
+        # 从已经抓到的新闻里用关键词过滤
+        news_items = [n for n in all_news if name in n.get("title", "")]
+        if not news_items:
+            # 如果库存新闻没有，再针对该品种搜一次
+            news_items = fetch_news([name], limit=3)
+        news = analyze_news_sentiment(news_items)
+
+        result = evaluate(data, news)
         if result["score"] >= 50 and result["direction"] in ("buy", "sell"):
+            sentiment_map = {"bullish": "偏多", "bearish": "偏空", "neutral": "中性"}
+            news["sentiment_label"] = sentiment_map.get(news["sentiment"], "中性")
             opportunities.append({
                 "symbol": key,
                 "name": name,
@@ -484,6 +673,7 @@ def main():
                 "stop_loss": result["stop_loss"],
                 "target": result["target"],
                 "reasons": result["reasons"],
+                "news": news,
             })
 
     # 按确信度排序
