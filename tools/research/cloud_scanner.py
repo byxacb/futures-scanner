@@ -635,12 +635,15 @@ def format_message(opportunities: list) -> str:
 
 
 def main():
+    print("=== cloud_scanner v2 已加载（含新闻搜索 + 掘金雷达三步指引）===")
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 开始扫描 {len(CANDIDATES)} 个品种...")
 
     # 先批量抓一次综合新闻（一次请求，不用每个品种都请求）
-    print("  抓取全网期货新闻...")
+    print("  [网络] 抓取 mysteel 期货新闻...")
     all_news = fetch_news(["期货"], limit=40)
-    print(f"  共抓到 {len(all_news)} 条期货新闻")
+    print(f"  [网络] 共抓到 {len(all_news)} 条期货新闻")
+    if all_news:
+        print(f"  [网络] 头条: {all_news[0].get('title','')[:60]}")
 
     opportunities = []
 
@@ -661,6 +664,8 @@ def main():
         news = analyze_news_sentiment(news_items)
 
         result = evaluate(data, news)
+        print(f"    -> 得分={result['score']} 方向={result['direction']} 新闻面={news['sentiment']}({news['score']}分)")
+
         if result["score"] >= 50 and result["direction"] in ("buy", "sell"):
             sentiment_map = {"bullish": "偏多", "bearish": "偏空", "neutral": "中性"}
             news["sentiment_label"] = sentiment_map.get(news["sentiment"], "中性")
@@ -682,24 +687,34 @@ def main():
     if opportunities:
         message = format_message(opportunities)
         title = f"发现 {len(opportunities)} 个交易机会"
+        print(f"  [消息] 长度={len(message)} 字符")
         print(message)
         send_bark(title, message)
         send_email(title, message)
     else:
         print("暂无高确信信号，不推送")
-        # 每4小时发一条心跳消息（8:00/12:00/16:00/20:00）
+        # 每4小时发一条心跳消息
         now = datetime.now()
         if now.hour in (8, 12, 16, 20) and now.minute < 10:
             msg = f"系统正常工作中\n已扫描{len(CANDIDATES)}个品种，暂无高确信信号\n\n发现机会时自动推送操作步骤"
             send_bark("期货扫描器心跳", msg)
             send_email("期货扫描器心跳", msg)
 
-    # 保存结果
+    # 保存 debug 日志到 daily/ 供本地查看云端状态
     result = {
         "timestamp": datetime.now().isoformat(),
         "count": len(opportunities),
+        "news_count": len(all_news),
         "opportunities": opportunities,
     }
+    debug_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "daily", "last_scan_debug.json")
+    try:
+        with open(debug_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2, default=str)
+        print(f"  [调试] 已写入 {debug_path}")
+    except Exception as e:
+        print(f"  [调试] 写入失败: {e}")
+
     print(f"\n扫描完成，发现 {len(opportunities)} 个机会")
     return result
 
