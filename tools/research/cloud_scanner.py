@@ -343,71 +343,117 @@ def send_email(title: str, content: str) -> bool:
 
 
 def format_message(opportunities: list) -> str:
-    """大白话格式，附带相关书本知识。"""
+    """大白话格式，按掘金雷达条件单界面生成逐步操作指引。"""
     if not opportunities:
         return "现在没有好机会，继续等。别着急下单。"
 
     # 获取知识库统计
     stats = get_stats()
 
+    # 合约代码映射
+    CODE_MAP = {
+        "锌": "ZN2605", "螺纹钢": "RB2610", "热卷": "HC2610", "铁矿石": "I2609",
+        "焦炭": "J2609", "焦煤": "JM2609", "不锈钢": "SS2606", "硅铁": "SF2609",
+        "锰硅": "SM2609", "铜": "CU2606", "铝": "AL2606", "铅": "PB2606",
+        "镍": "NI2606", "锡": "SN2606", "黄金": "AU2606", "白银": "AG2606",
+        "原油": "SC2606", "燃料油": "FU2609", "沥青": "BU2606", "橡胶": "RU2609",
+        "纸浆": "SP2609", "PTA": "TA2609", "甲醇": "MA2609", "玻璃": "FG2609",
+        "纯碱": "SA2609", "乙二醇": "EG2609", "苯乙烯": "EB2606", "聚丙烯": "PP2609",
+        "PVC": "V2609", "塑料": "L2609", "液化气": "PG2606", "豆粕": "M2609",
+        "豆油": "Y2609", "棕榈油": "P2609", "玉米": "C2609", "淀粉": "CS2609",
+        "棉花": "CF2609", "白糖": "SR2609", "菜油": "OI2609", "菜粕": "RM2609",
+        "苹果": "AP2610", "红枣": "CJ2609", "花生": "PK2610", "短纤": "PF2606",
+        "尿素": "UR2609", "沪深300": "IF2605", "中证500": "IC2605",
+        "上证50": "IH2605", "中证1000": "IM2605", "10年国债": "T2606",
+        "5年国债": "TF2606", "2年国债": "TS2606", "30年国债": "TL2606",
+        "工业硅": "SI2607", "碳酸锂": "LC2607",
+    }
+
     lines = []
     for i, opp in enumerate(opportunities[:3], 1):
         name = opp["name"]
         is_buy = opp["direction"] == "buy"
-        action = "买入" if is_buy else "卖出"
-
-        # 合约代码映射
-        CODE_MAP = {
-            "锌": "ZN2605", "螺纹钢": "RB2610", "热卷": "HC2610", "铁矿石": "I2609",
-            "焦炭": "J2609", "焦煤": "JM2609", "铜": "CU2606", "铝": "AL2606",
-            "铅": "PB2606", "镍": "NI2606", "锡": "SN2606", "黄金": "AU2606",
-            "白银": "AG2606", "原油": "SC2606", "燃料油": "FU2609", "沥青": "BU2606",
-            "橡胶": "RU2609", "纸浆": "SP2609", "PTA": "TA2609", "甲醇": "MA2609",
-            "玻璃": "FG2609", "纯碱": "SA2609", "乙二醇": "EG2609", "苯乙烯": "EB2606",
-            "聚丙烯": "PP2609", "PVC": "V2609", "塑料": "L2609", "液化气": "PG2606",
-            "豆粕": "M2609", "豆油": "Y2609", "棕榈油": "P2609", "玉米": "C2609",
-            "淀粉": "CS2609", "棉花": "CF2609", "白糖": "SR2609", "菜油": "OI2609",
-            "菜粕": "RM2609", "苹果": "AP2610", "红枣": "CJ2609", "花生": "PK2610",
-            "短纤": "PF2606", "尿素": "UR2609",
-        }
         contract_code = CODE_MAP.get(name, opp.get("symbol", "").upper())
+        entry = opp["entry"]
+        stop_loss = opp["stop_loss"]
+        target = opp["target"]
 
-        lines.append(f"{'='*20}")
+        lines.append(f"{'='*25}")
         lines.append(f"机会{i}：{name}（{contract_code}）")
-        lines.append(f"{'='*20}")
-        lines.append("")
-        lines.append(f"【操作】{action}{name}")
-        lines.append(f"【合约代码】{contract_code}")
-        lines.append(f"【确信度】{opp['score']}分（满分100）")
-        lines.append("")
-        lines.append("打开掘金雷达，这样操作：")
-        lines.append(f"  1. 搜索「{contract_code}」或「{name}」")
-        lines.append(f"  2. 点「条件单」→ 选 {contract_code}")
-        lines.append(f"  2. 委托价格填 {opp['entry']}")
-        lines.append(f"  3. 止损价格填 {opp['stop_loss']}")
-        lines.append(f"  4. 目标价格填 {opp['target']}")
-        lines.append("")
-        lines.append(f"【为什么】{' | '.join(opp['reasons'])}")
+        lines.append(f"{'='*25}")
+        lines.append(f"确信度 {opp['score']}分/100")
+        lines.append(f"{'─'*25}")
         lines.append("")
 
-        # 添加相关书本知识
+        # === 第一部分：开仓条件单 ===
+        lines.append("【开仓】打开掘金雷达 → 条件单 → 指定价格开仓")
+        lines.append("")
         if is_buy:
-            relevant = search_rules("趋势") + search_rules("突破") + search_rules("动量")
+            lines.append(f"1. 合约 → {contract_code}")
+            lines.append(f"2. 当行情价格 ≥ {entry}")
+            lines.append(f"3. 委托方向 → 买入开仓")
+            lines.append(f"4. 委托价格 → 对手价")
+            lines.append(f"5. 委托数量 → 根据资金定（单品种≤30%）")
+            lines.append(f"6. 有效期 → 持续有效")
+            lines.append(f"7. 点提交")
         else:
-            relevant = search_rules("止损") + search_rules("风控")
-        if relevant:
-            lines.append("【参考知识】")
-            for rule in relevant[:3]:
-                lines.append(f"  • {rule[1]}（{rule[2]}）")
-            lines.append("")
+            lines.append(f"1. 合约 → {contract_code}")
+            lines.append(f"2. 当行情价格 ≤ {entry}")
+            lines.append(f"3. 委托方向 → 卖出开仓")
+            lines.append(f"4. 委托价格 → 对手价")
+            lines.append(f"5. 委托数量 → 根据资金定（单品种≤30%）")
+            lines.append(f"6. 有效期 → 持续有效")
+            lines.append(f"7. 点提交")
+        lines.append("")
 
-    lines.append("="*20)
-    lines.append(f"知识库：{stats['total_rules']}条规则，{stats['books_covered']}本书")
-    lines.append("="*20)
+        # === 第二部分：止损条件单 ===
+        lines.append("【止损】返回 → 条件单 → 指定价格止损")
+        lines.append("")
+        if is_buy:
+            lines.append(f"1. 合约 → {contract_code}")
+            lines.append(f"2. 当行情下跌至 {stop_loss}")
+            lines.append(f"3. 委托价格 → 对手价")
+            lines.append(f"4. 平仓数量 → 和开仓数量一样")
+            lines.append(f"5. 有效期 → 持续有效")
+            lines.append(f"6. 点提交")
+        else:
+            lines.append(f"1. 合约 → {contract_code}")
+            lines.append(f"2. 当行情上涨至 {stop_loss}")
+            lines.append(f"3. 委托价格 → 对手价")
+            lines.append(f"4. 平仓数量 → 和开仓数量一样")
+            lines.append(f"5. 有效期 → 持续有效")
+            lines.append(f"6. 点提交")
+        lines.append("")
+
+        # === 第三部分：止盈条件单 ===
+        lines.append("【止盈】返回 → 条件单 → 指定价格止盈")
+        lines.append("")
+        if is_buy:
+            lines.append(f"1. 合约 → {contract_code}")
+            lines.append(f"2. 当行情上涨至 {target}")
+            lines.append(f"3. 委托价格 → 对手价")
+            lines.append(f"4. 平仓数量 → 和开仓数量一样")
+            lines.append(f"5. 有效期 → 持续有效")
+            lines.append(f"6. 点提交")
+        else:
+            lines.append(f"1. 合约 → {contract_code}")
+            lines.append(f"2. 当行情下跌至 {target}")
+            lines.append(f"3. 委托价格 → 对手价")
+            lines.append(f"4. 平仓数量 → 和开仓数量一样")
+            lines.append(f"5. 有效期 → 持续有效")
+            lines.append(f"6. 点提交")
+        lines.append("")
+
+        # === 原因 ===
+        lines.append(f"【为什么做】{' | '.join(opp['reasons'])}")
+        lines.append("")
+
+    lines.append("="*25)
+    lines.append("铁律提醒")
+    lines.append("="*25)
     lines.append("• 铁律#5：止损必须挂，不挂不下单")
-    lines.append("• 铁律#3：每个品种最多花30%的钱")
+    lines.append("• 铁律#3：单品种最多花30%的钱")
     lines.append("• 铁律#14：盈亏比≥2:1才值得做")
-    lines.append("• 铁律#12：大部分时间什么都不做")
     lines.append("• 不确定就不做，等下一个机会")
 
     return "\n".join(lines)
