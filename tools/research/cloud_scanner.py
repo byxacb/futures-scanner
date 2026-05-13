@@ -356,15 +356,33 @@ def format_message(opportunities: list) -> str:
         is_buy = opp["direction"] == "buy"
         action = "买入" if is_buy else "卖出"
 
+        # 合约代码映射
+        CODE_MAP = {
+            "锌": "ZN2605", "螺纹钢": "RB2610", "热卷": "HC2610", "铁矿石": "I2609",
+            "焦炭": "J2609", "焦煤": "JM2609", "铜": "CU2606", "铝": "AL2606",
+            "铅": "PB2606", "镍": "NI2606", "锡": "SN2606", "黄金": "AU2606",
+            "白银": "AG2606", "原油": "SC2606", "燃料油": "FU2609", "沥青": "BU2606",
+            "橡胶": "RU2609", "纸浆": "SP2609", "PTA": "TA2609", "甲醇": "MA2609",
+            "玻璃": "FG2609", "纯碱": "SA2609", "乙二醇": "EG2609", "苯乙烯": "EB2606",
+            "聚丙烯": "PP2609", "PVC": "V2609", "塑料": "L2609", "液化气": "PG2606",
+            "豆粕": "M2609", "豆油": "Y2609", "棕榈油": "P2609", "玉米": "C2609",
+            "淀粉": "CS2609", "棉花": "CF2609", "白糖": "SR2609", "菜油": "OI2609",
+            "菜粕": "RM2609", "苹果": "AP2610", "红枣": "CJ2609", "花生": "PK2610",
+            "短纤": "PF2606", "尿素": "UR2609",
+        }
+        contract_code = CODE_MAP.get(name, opp.get("symbol", "").upper())
+
         lines.append(f"{'='*20}")
-        lines.append(f"机会{i}：{name}")
+        lines.append(f"机会{i}：{name}（{contract_code}）")
         lines.append(f"{'='*20}")
         lines.append("")
         lines.append(f"【操作】{action}{name}")
+        lines.append(f"【合约代码】{contract_code}")
         lines.append(f"【确信度】{opp['score']}分（满分100）")
         lines.append("")
         lines.append("打开掘金雷达，这样操作：")
-        lines.append(f"  1. 点「条件单」→ 选「{name}」")
+        lines.append(f"  1. 搜索「{contract_code}」或「{name}」")
+        lines.append(f"  2. 点「条件单」→ 选 {contract_code}")
         lines.append(f"  2. 委托价格填 {opp['entry']}")
         lines.append(f"  3. 止损价格填 {opp['stop_loss']}")
         lines.append(f"  4. 目标价格填 {opp['target']}")
